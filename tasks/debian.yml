@@ -1,0 +1,22 @@
+---
+- name: Install packages for Debian
+  apt: name={{ item }} update_cache=yes
+  with_items:
+    - build-essential
+    - git
+    - libssl-dev
+    - libqt4-dev
+    - libc6-dev
+    - automake
+    - libtool
+    - libyaml-dev
+    - zlib1g
+    - zlib1g-dev
+    - openssl
+    - libssl-dev
+    - libreadline-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libncurses5-dev
+    - pkg-config
+

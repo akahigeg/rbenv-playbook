@@ -1,0 +1,95 @@
+---
+# Default vars
+- name: Default rbenv group
+  set_fact:
+    rbenv_group: "rbenv"
+  when: rbenv_group is not defined
+
+- name: Default rbenv user
+  set_fact:
+    rbenv_user: "rbenv"
+  when: rbenv_user is not defined
+
+- name: Default RBENV_ROOT
+  set_fact:
+    rbenv_user: "/opt/rbenv"
+  when: rbenv_root is not defined
+
+- name: Default global ruby version
+  set_fact:
+    rbenv_global_ruby_version: "2.1.2"
+  when: rbenv_global_ruby_version is not defined
+
+- name: Default gems for rbenv global ruby
+  set_fact:
+    rbenv_global_gems: ["bundler", "rbenv-rehash"]
+
+# Create rbnev user and group
+- name: Check rbenv group var
+  set_fact:
+    rbenv_group: "rbenv"
+  when: rbenv_group is not defined
+
+- name: Add rbenv group
+  group: name={{ rbenv_group }}
+
+- name: Add rbenv user
+  user: name={{ rbenv_user }} group={{ rbenv_group }}
+
+- name: Append extra users to rbenv group
+  user: name={{ item }} group={{ rbenv_group }} append=yes
+  with_items: rbenv_extra_users
+  when: rbenv_extra_users is defined
+
+# Install packages for installing Ruby
+- include: debian.yml
+  when: ansible_os_family == "Debian"
+
+- include: redhat.yml
+  when: ansible_os_family == "RedHat"
+
+# rbenv
+- name: Install rbenv
+  git: repo=https://github.com/sstephenson/rbenv.git
+       dest={{ rbenv_root }}
+       version=master
+       update=no
+
+- name: Create /etc/profile.d/rbenv.sh
+  shell: "echo 'export RBENV_ROOT={{ rbenv_root }}\nexport PATH={{ rbenv_root }}/bin:$PATH\neval \"$(rbenv init -)\"' > /etc/profile.d/rbenv.sh;"
+  args:
+    creates: /etc/profile.d/rbenv.sh
+
+- name: Install ruby_build
+  git: repo=https://github.com/sstephenson/ruby-build.git
+       dest={{ rbenv_root }}/plugins/ruby-build
+       version=master
+       update=no
+
+- name: Install a blobal ruby {{rbenv_global_ruby_version}}
+  shell: "export RBENV_ROOT={{ rbenv_root }}; export PATH=$RBENV_ROOT/bin:$PATH; rbenv install {{ rbenv_global_ruby_version }}; rbenv global {{ rbenv_global_ruby_version }}"
+  args:
+    creates: "{{ rbenv_root }}/versions/{{ rbenv_global_ruby_version }}/"
+
+- name: Install other versions of ruby
+  shell: "export RBENV_ROOT={{ rbenv_root }}; export PATH=$RBENV_ROOT/bin:$PATH; rbenv install {{ item.version }};"
+  args:
+    creates: "{{ rbenv_root }}/versions/{{ item.version }}/"
+  with_items: rbenv_other_ruby_versions
+  when: rbenv_other_ruby_versions is defined
+
+- name: Install gems for global ruby
+  gem: name={{ item.name }} executable="{{ rbenv_root }}/shims/gem" user_install=no version={{ item.version }}
+  with_items: rbenv_global_gems
+  when: rbenv_global_gems is defined
+
+- name: Change RBENV_ROOT owner to {{ rbenv_user }}:{{ rbenv_group }}
+  file: path={{ rbenv_root }} owner={{ rbenv_user }} group={{ rbenv_group }} mode=g+w recurse=yes
+
+- name: Keep RBENV_ROOT belongs {{ rbenv_user }}:{{ rbenv_group }}
+  cron: name="keep RBENV_ROOT owner" job="chown -R {{ rbenv_user }}:{{ rbenv_group}} {{ rbenv_root }}"
+  when: rbenv_keep_group_write_by_cron is defined and rbenv_keep_group_write_by_cron
+
+- name: Keep group write for RBENV_ROOT
+  cron: name="keep group write for RBENV_ROOT" job="chmod g+w -R {{ rbenv_root }}"
+  when: rbenv_keep_group_write_by_cron is defined and rbenv_keep_group_write_by_cron

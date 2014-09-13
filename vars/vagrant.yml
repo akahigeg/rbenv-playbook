@@ -1,0 +1,14 @@
+---
+rbenv_root: /opt/rbenv
+rbenv_user: rbenv
+rbenv_group: rbenv
+rbenv_extra_users: [vagrant]
+rbenv_global_ruby_version: 2.1.2
+rbenv_other_ruby_versions: 
+  - { version: "2.1.1" }
+rbenv_global_gems:
+  - { name: "bundler", version: "" }
+  - { name: "pry", version: "" }
+  - { name: "rbenv-rehash", version: "" }
+  - { name: "nokogiri", version: "1.5.10" }
+rbenv_keep_group_write_by_cron: yes
