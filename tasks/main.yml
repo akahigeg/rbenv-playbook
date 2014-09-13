@@ -12,7 +12,7 @@
 
 - name: Default RBENV_ROOT
   set_fact:
-    rbenv_user: "/opt/rbenv"
+    rbenv_root: "/opt/rbenv"
   when: rbenv_root is not defined
 
 - name: Default global ruby version
@@ -22,7 +22,10 @@
 
 - name: Default gems for rbenv global ruby
   set_fact:
-    rbenv_global_gems: ["bundler", "rbenv-rehash"]
+    rbenv_global_gems:
+      - { name: "bundler", version: "" }
+      - { name: "rbenv-rehash", version: "" }
+  when: rbenv_global_gems is not defined
 
 # Create rbnev user and group
 - name: Check rbenv group var
@@ -41,7 +44,7 @@
   with_items: rbenv_extra_users
   when: rbenv_extra_users is defined
 
-# Install packages for installing Ruby
+# Install packages to install Ruby
 - include: debian.yml
   when: ansible_os_family == "Debian"
 
@@ -88,8 +91,8 @@
 
 - name: Keep RBENV_ROOT belongs {{ rbenv_user }}:{{ rbenv_group }}
   cron: name="keep RBENV_ROOT owner" job="chown -R {{ rbenv_user }}:{{ rbenv_group}} {{ rbenv_root }}"
-  when: rbenv_keep_group_write_by_cron is defined and rbenv_keep_group_write_by_cron
+  when: rbenv_keep_group_write is defined and rbenv_keep_group_write_by_cron
 
 - name: Keep group write for RBENV_ROOT
   cron: name="keep group write for RBENV_ROOT" job="chmod g+w -R {{ rbenv_root }}"
-  when: rbenv_keep_group_write_by_cron is defined and rbenv_keep_group_write_by_cron
+  when: rbenv_keep_group_write is defined and rbenv_keep_group_write_by_cron
