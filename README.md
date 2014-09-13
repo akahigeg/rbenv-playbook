@@ -85,6 +85,7 @@ This cookbook is tested by below things.
 
     $ git clone https://github.com/akahigeg/rbenv-playbook.git
     $ cd rbenv-playbook
+    $ vagrant box add debian74 http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_debian-7.4_chef-provisionerless.box
     $ vagrant up
     $ bundle install
     $ bundle exec rake spec
