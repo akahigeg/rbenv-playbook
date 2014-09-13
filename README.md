@@ -1,11 +1,12 @@
 Ansible playbook for installing ruby by rbenv.
 
 This playbook is created on Debian 7.4.
-Maybe works on RedHat.
+Maybe works on RedHat too.
 
 # How to use
 
-Fetch [rbenv-playbook/tasks/main.yml]()
+Include `rbenv-playbook/tasks/main.yml` in your playbook.
+And add vars if you will config rbenv installation.
 
 ## Just install
 
