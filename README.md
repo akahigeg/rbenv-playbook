@@ -66,7 +66,7 @@ It's Default install.
 |var                      |required|default     |comments|
 |-------------------------|--------|------------|--------|
 |rbenv_root               | no     | /opt/rbenv | RBENV_ROOT |
-|rbenv_user               | no     | rbenv      | User own RBENV_ROOT owner |
+|rbenv_user               | no     | rbenv      | RBENV_ROOT owner |
 |rbenv_group              | no     | rbenv      | RBENV_ROOT group |
 |rbenv_extra_users        | no     |            | Extra users belong to rbenv_group |
 |rbenv_global_ruby_version| no     | 2.1.2      | The global Ruby version on rbenv |
