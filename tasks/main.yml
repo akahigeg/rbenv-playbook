@@ -15,12 +15,12 @@
     rbenv_root: "/opt/rbenv"
   when: rbenv_root is not defined
 
-- name: Default global ruby version
+- name: Default the global ruby version
   set_fact:
     rbenv_global_ruby_version: "2.1.2"
   when: rbenv_global_ruby_version is not defined
 
-- name: Default gems for rbenv global ruby
+- name: Default gems for the global ruby
   set_fact:
     rbenv_global_gems:
       - { name: "bundler", version: "" }
@@ -28,11 +28,6 @@
   when: rbenv_global_gems is not defined
 
 # Create rbnev user and group
-- name: Check rbenv group var
-  set_fact:
-    rbenv_group: "rbenv"
-  when: rbenv_group is not defined
-
 - name: Add rbenv group
   group: name={{ rbenv_group }}
 
@@ -69,7 +64,7 @@
        version=master
        update=no
 
-- name: Install a blobal ruby {{rbenv_global_ruby_version}}
+- name: Install the blobal ruby {{rbenv_global_ruby_version}}
   shell: "export RBENV_ROOT={{ rbenv_root }}; export PATH=$RBENV_ROOT/bin:$PATH; rbenv install {{ rbenv_global_ruby_version }}; rbenv global {{ rbenv_global_ruby_version }}"
   args:
     creates: "{{ rbenv_root }}/versions/{{ rbenv_global_ruby_version }}/"
@@ -81,7 +76,7 @@
   with_items: rbenv_other_ruby_versions
   when: rbenv_other_ruby_versions is defined
 
-- name: Install gems for global ruby
+- name: Install gems for the global ruby
   gem: name={{ item.name }} executable="{{ rbenv_root }}/shims/gem" user_install=no version={{ item.version }}
   with_items: rbenv_global_gems
   when: rbenv_global_gems is defined
@@ -89,10 +84,10 @@
 - name: Change RBENV_ROOT owner to {{ rbenv_user }}:{{ rbenv_group }}
   file: path={{ rbenv_root }} owner={{ rbenv_user }} group={{ rbenv_group }} mode=g+w recurse=yes
 
-- name: Keep RBENV_ROOT belongs {{ rbenv_user }}:{{ rbenv_group }}
+- name: Keep RBENV_ROOT belongs to {{ rbenv_user }}:{{ rbenv_group }}
   cron: name="keep RBENV_ROOT owner" job="chown -R {{ rbenv_user }}:{{ rbenv_group}} {{ rbenv_root }}"
   when: rbenv_keep_group_write is defined and rbenv_keep_group_write_by_cron
 
-- name: Keep group write for RBENV_ROOT
-  cron: name="keep group write for RBENV_ROOT" job="chmod g+w -R {{ rbenv_root }}"
+- name: Keep group write on RBENV_ROOT
+  cron: name="keep group write on RBENV_ROOT" job="chmod g+w -R {{ rbenv_root }}"
   when: rbenv_keep_group_write is defined and rbenv_keep_group_write_by_cron
